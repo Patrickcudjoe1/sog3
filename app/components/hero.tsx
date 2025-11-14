@@ -29,7 +29,7 @@ export default function Hero() {
             viewport={{ once: true }}
             className="text-2xl md:text-3xl tracking-widest uppercase font-light mb-12 text-center"
           >
-            Shop The Look
+           
           </motion.h2>
 
           <div className="space-y-12 w-full max-w-sm">
@@ -50,7 +50,7 @@ export default function Hero() {
                   />
                 </div>
                 <p className="text-xs tracking-widest uppercase font-light">Product Name {item}</p>
-                <p className="text-xs text-gray-600 mt-2">$299</p>
+                <p className="text-xs text-gray-600 mt-2"></p>
               </motion.div>
             ))}
           </div>
