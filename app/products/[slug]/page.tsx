@@ -2,32 +2,22 @@ import { Metadata } from "next"
 import { notFound } from "next/navigation"
 import Image from "next/image"
 import Link from "next/link"
-import Navbar from "../../components/navbar"
-import Footer from "../../components/footer"
-import ProductDetailClient from "../../components/product-detail-client"
-import { 
-  products, 
-  getProductBySlug, 
-  getAllProductSlugs,
-  getProductSlug,
-  type Product 
-} from "../../lib/products"
-import { formatCurrency } from "../../lib/currency"
+import Navbar from "@/app/components/navbar"
+import Footer from "@/app/components/footer"
+import ProductDetailClient from "@/app/components/product-detail-client"
+import { products, getProductBySlug, getAllProductSlugs, getProductSlug } from "@/app/lib/products"
+import { formatCurrency } from "@/app/lib/currency"
 
 // Static Site Generation - Generate all product pages at build time
 export async function generateStaticParams() {
   const slugs = getAllProductSlugs()
   return slugs.map((slug) => ({
-    slug: slug,
+    slug,
   }))
 }
 
 // SEO Metadata generation
-export async function generateMetadata({ 
-  params 
-}: { 
-  params: { slug: string } 
-}): Promise<Metadata> {
+export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
   const product = getProductBySlug(params.slug)
 
   if (!product) {
@@ -39,8 +29,8 @@ export async function generateMetadata({
 
   const title = `${product.name} | Son of God`
   const description = product.description || `${product.name} from Son of God. ${product.category} collection.`
-  const imageUrl = product.image.startsWith('/') 
-    ? `${process.env.NEXT_PUBLIC_BASE_URL || 'https://sonofgod.com'}${product.image}`
+  const imageUrl = product.image.startsWith("/")
+    ? `${process.env.NEXT_PUBLIC_BASE_URL || "https://sonofgod.com"}${product.image}`
     : product.image
 
   return {
@@ -78,7 +68,7 @@ interface ProductPageProps {
   params: { slug: string }
 }
 
-export default async function ProductPage({ params }: ProductPageProps) {
+export default function ProductPage({ params }: ProductPageProps) {
   const product = getProductBySlug(params.slug)
 
   if (!product) {
@@ -105,7 +95,10 @@ export default async function ProductPage({ params }: ProductPageProps) {
               SHOP
             </Link>
             <span className="text-gray-400">/</span>
-            <Link href={`/${product.category.toLowerCase().replace(/\s+/g, '-')}`} className="text-gray-600 hover:opacity-60 transition-opacity">
+            <Link
+              href={`/${product.category.toLowerCase().replace(/\s+/g, "-")}`}
+              className="text-gray-600 hover:opacity-60 transition-opacity"
+            >
               {product.category}
             </Link>
             <span className="text-gray-400">/</span>
@@ -130,11 +123,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
               {relatedProducts.map((relatedProduct) => {
                 const relatedSlug = getProductSlug(relatedProduct)
                 return (
-                  <Link 
-                    key={relatedProduct.id} 
-                    href={`/products/${relatedSlug}`} 
-                    className="group"
-                  >
+                  <Link key={relatedProduct.id} href={`/products/${relatedSlug}`} className="group">
                     <div className="relative w-full aspect-square bg-gray-100 overflow-hidden mb-4">
                       <Image
                         src={relatedProduct.image || "/placeholder.svg"}
