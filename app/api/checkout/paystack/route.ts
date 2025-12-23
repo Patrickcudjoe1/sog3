@@ -48,6 +48,7 @@ export async function POST(req: NextRequest) {
       discount,
       total,
       promoCode,
+      paymentMethod,
       mobileMoneyPhone,
       mobileMoneyProvider,
     } = body
@@ -65,12 +66,15 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Invalid email format" }, { status: 400 })
     }
 
-    if (!mobileMoneyPhone || !mobileMoneyProvider) {
-      return NextResponse.json({ error: "Mobile money information is required" }, { status: 400 })
-    }
+    // Mobile money validation (only required for mobile money payments)
+    if (paymentMethod === "mobile_money") {
+      if (!mobileMoneyPhone || !mobileMoneyProvider) {
+        return NextResponse.json({ error: "Mobile money information is required" }, { status: 400 })
+      }
 
-    if (!validateGhanaPhone(mobileMoneyPhone)) {
-      return NextResponse.json({ error: "Invalid phone number format" }, { status: 400 })
+      if (!validateGhanaPhone(mobileMoneyPhone)) {
+        return NextResponse.json({ error: "Invalid phone number format" }, { status: 400 })
+      }
     }
 
     // Server-side cart validation
@@ -145,10 +149,10 @@ export async function POST(req: NextRequest) {
         discountAmount: sanitizedDiscount,
         totalAmount: sanitizedTotal,
         promoCode: promoCode || null,
-        paymentMethod: "mobile_money",
+        paymentMethod: paymentMethod || "card",
         paymentStatus: PaymentStatus.PENDING,
-        mobileMoneyProvider,
-        mobileMoneyPhone: formatGhanaPhone(mobileMoneyPhone),
+        mobileMoneyProvider: paymentMethod === "mobile_money" ? mobileMoneyProvider : null,
+        mobileMoneyPhone: paymentMethod === "mobile_money" ? formatGhanaPhone(mobileMoneyPhone) : null,
         deliveryMethod: deliveryMethod || null,
         idempotencyKey,
         shippingAddressId: shippingAddress.id,
@@ -186,7 +190,8 @@ export async function POST(req: NextRequest) {
           orderId: order.id,
           orderNumber: order.orderNumber,
           idempotencyKey,
-          custom_fields: [
+          paymentMethod: paymentMethod || "card",
+          custom_fields: paymentMethod === "mobile_money" ? [
             {
               display_name: "Mobile Money Provider",
               variable_name: "mobile_money_provider",
@@ -197,7 +202,7 @@ export async function POST(req: NextRequest) {
               variable_name: "mobile_money_phone",
               value: formatGhanaPhone(mobileMoneyPhone),
             },
-          ],
+          ] : [],
         },
       }),
     })

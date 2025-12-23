@@ -28,7 +28,7 @@ export default function PaymentMethodSelector({
         >
           <CreditCard size={20} className="mx-auto mb-1.5 md:mb-2 md:w-6 md:h-6" />
           <p className="text-[10px] md:text-xs tracking-widest uppercase font-light">Card</p>
-          <p className="text-[9px] md:text-[10px] text-gray-500 mt-0.5 md:mt-1">Debit/Credit</p>
+          <p className="text-[9px] md:text-[10px] text-gray-500 mt-0.5 md:mt-1">Paystack</p>
         </button>
 
         <button
@@ -42,7 +42,7 @@ export default function PaymentMethodSelector({
         >
           <Smartphone size={20} className="mx-auto mb-1.5 md:mb-2 md:w-6 md:h-6" />
           <p className="text-[10px] md:text-xs tracking-widest uppercase font-light">Mobile Money</p>
-          <p className="text-[9px] md:text-[10px] text-gray-500 mt-0.5 md:mt-1">MTN, Vodafone, etc.</p>
+          <p className="text-[9px] md:text-[10px] text-gray-500 mt-0.5 md:mt-1">Paystack</p>
         </button>
       </div>
     </div>

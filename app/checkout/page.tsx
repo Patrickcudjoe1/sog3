@@ -290,43 +290,25 @@ export default function Checkout() {
         mobileMoneyProvider: paymentMethod === "mobile_money" ? mobileMoneyProvider : null,
       };
 
-      if (paymentMethod === "card") {
-        // Stripe checkout
-        const response = await fetch("/api/checkout/create", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(orderData),
-        });
+      // Use Paystack for all payment methods (card and mobile money)
+      const response = await fetch("/api/checkout/paystack", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(orderData),
+      });
 
-        const data = await response.json();
+      const data = await response.json();
 
-        if (data.url) {
-          window.location.href = data.url;
-        } else {
-          alert(data.error || "Checkout failed. Please try again.");
-          setLoading(false);
-        }
+      if (data.success && data.authorizationUrl) {
+        // Redirect to Paystack payment page
+        window.location.href = data.authorizationUrl;
+      } else if (data.success && data.orderId) {
+        // Fallback: if Paystack is not configured, use old endpoint
+        clearCart();
+        router.push(`/checkout/success?orderId=${data.orderId}`);
       } else {
-        // Mobile money payment via Paystack
-        const response = await fetch("/api/checkout/paystack", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(orderData),
-        });
-
-        const data = await response.json();
-
-        if (data.success && data.authorizationUrl) {
-          // Redirect to Paystack payment page
-          window.location.href = data.authorizationUrl;
-        } else if (data.success && data.orderId) {
-          // Fallback: if Paystack is not configured, use old endpoint
-          clearCart();
-          router.push(`/checkout/success?orderId=${data.orderId}`);
-        } else {
-          alert(data.error || "Payment initialization failed. Please try again.");
-          setLoading(false);
-        }
+        alert(data.error || "Payment initialization failed. Please try again.");
+        setLoading(false);
       }
     } catch (error) {
       console.error("Checkout error:", error);
