@@ -9,6 +9,7 @@ export interface Product {
   colors?: string[]
   isNewArrival?: boolean
   slug?: string
+  images?: string[] // Additional product images for gallery
 }
 
 /**

@@ -104,11 +104,20 @@ export default function ProductPage({ params }: ProductPageProps) {
             <span className="text-gray-400">/</span>
             <span className="text-gray-600">{product.name}</span>
           </div>
+          {/* Mobile back button */}
+          <div className="md:hidden mt-3">
+            <Link
+              href={`/${product.category.toLowerCase().replace(/\s+/g, "-")}`}
+              className="text-xs tracking-widest uppercase font-light text-gray-600 hover:text-black transition-colors inline-flex items-center gap-1"
+            >
+              ← Back to {product.category}
+            </Link>
+          </div>
         </div>
       </section>
 
       {/* Product Detail */}
-      <section className="w-full py-16 px-6 md:px-12">
+      <section className="w-full py-8 md:py-16 px-4 md:px-6 lg:px-12">
         <div className="max-w-7xl mx-auto">
           <ProductDetailClient product={product} />
         </div>
