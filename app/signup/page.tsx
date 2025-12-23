@@ -65,16 +65,29 @@ export default function SignUp() {
       }
 
       if (data.user) {
-        // Check if email confirmation is required
-        // Supabase sends confirmation email if email_confirmed_at is null
-        // and the provider requires email confirmation
-        const needsEmailConfirmation = !data.user.email_confirmed_at && data.session === null
+        // If session exists, user is automatically signed in (email confirmation disabled)
+        if (data.session) {
+          // User is signed in - redirect to home or account page
+          router.push("/")
+          return
+        }
         
-        if (needsEmailConfirmation) {
-          // Email confirmation required - user needs to check email
+        // If no session but user created, try to sign in immediately
+        // This works if email confirmation is disabled in Supabase
+        const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        })
+        
+        if (signInError) {
+          // If sign in fails, email confirmation might be required
+          // Redirect to sign in page with message
           router.push("/signin?registered=true&confirm=email")
+        } else if (signInData.session) {
+          // Successfully signed in - redirect to home
+          router.push("/")
         } else {
-          // Email confirmation not required - can sign in immediately
+          // Fallback - redirect to sign in
           router.push("/signin?registered=true")
         }
       }
