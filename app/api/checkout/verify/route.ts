@@ -11,12 +11,11 @@ export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url)
     const orderId = searchParams.get("orderId")
-    const sessionId = searchParams.get("session_id")
     const reference = searchParams.get("reference")
 
-    if (!orderId && !sessionId && !reference) {
+    if (!orderId && !reference) {
       return NextResponse.json(
-        { error: "Order ID, session ID, or reference is required" },
+        { error: "Order ID or Paystack reference is required" },
         { status: 400 }
       )
     }
@@ -26,14 +25,6 @@ export async function GET(req: NextRequest) {
     if (orderId) {
       order = await prisma.order.findUnique({
         where: { id: orderId },
-        include: {
-          items: true,
-          shippingAddress: true,
-        },
-      })
-    } else if (sessionId) {
-      order = await prisma.order.findFirst({
-        where: { stripeSessionId: sessionId },
         include: {
           items: true,
           shippingAddress: true,

@@ -34,7 +34,6 @@ export interface CreateOrderData {
   paymentMethod: string
   deliveryMethod?: string
   idempotencyKey: string
-  stripeSessionId?: string
   paystackReference?: string
   mobileMoneyTransactionId?: string
   mobileMoneyProvider?: string
@@ -90,7 +89,6 @@ export class OrderService {
         paymentStatus: PaymentStatus.PENDING,
         deliveryMethod: data.deliveryMethod || null,
         idempotencyKey: data.idempotencyKey,
-        stripeSessionId: data.stripeSessionId || null,
         paystackReference: data.paystackReference || null,
         mobileMoneyTransactionId: data.mobileMoneyTransactionId || null,
         mobileMoneyProvider: data.mobileMoneyProvider || null,
@@ -227,13 +225,13 @@ export class OrderService {
   static async updatePaymentStatus(
     orderId: string,
     paymentStatus: PaymentStatus,
-    stripePaymentIntentId?: string
+    paystackReference?: string
   ) {
     return await prisma.order.update({
       where: { id: orderId },
       data: {
         paymentStatus,
-        ...(stripePaymentIntentId && { stripePaymentIntentId }),
+        ...(paystackReference && { paystackReference }),
         webhookProcessed: true,
       },
     })

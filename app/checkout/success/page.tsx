@@ -25,24 +25,24 @@ export default function CheckoutSuccess() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const orderId = searchParams.get("orderId");
-  const sessionId = searchParams.get("session_id");
+  const reference = searchParams.get("reference");
   const [order, setOrder] = useState<OrderDetails | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
   useEffect(() => {
-    if (!orderId) {
-      setError("No order ID provided");
+    if (!orderId && !reference) {
+      setError("No order ID or reference provided");
       setLoading(false);
       return;
     }
 
-    // If we have a Stripe session ID, verify payment first
-    if (sessionId) {
-      fetch(`/api/checkout/verify?session_id=${sessionId}`)
+    // If we have a Paystack reference, verify payment first
+    if (reference) {
+      fetch(`/api/checkout/verify?reference=${reference}`)
         .then((res) => res.json())
         .then((data) => {
-          if (data.success) {
+          if (data.paid) {
             fetchOrderDetails();
           } else {
             setError("Payment verification failed");
@@ -57,18 +57,32 @@ export default function CheckoutSuccess() {
     } else {
       fetchOrderDetails();
     }
-  }, [orderId, sessionId]);
+  }, [orderId, reference]);
 
   const fetchOrderDetails = async () => {
-    if (!orderId) return;
+    if (!orderId && !reference) return;
 
     try {
-      const response = await fetch(`/api/orders/${orderId}`);
+      const url = orderId 
+        ? `/api/orders/${orderId}`
+        : `/api/checkout/verify?reference=${reference}`;
+      const response = await fetch(url);
       if (!response.ok) {
         throw new Error("Failed to fetch order details");
       }
       const data = await response.json();
-      setOrder(data);
+      // If we got data from verify endpoint, fetch full order details
+      if (data.orderId && !orderId) {
+        const orderResponse = await fetch(`/api/orders/${data.orderId}`);
+        if (orderResponse.ok) {
+          const orderData = await orderResponse.json();
+          setOrder(orderData);
+        } else {
+          setOrder(data);
+        }
+      } else {
+        setOrder(data);
+      }
     } catch (err) {
       console.error("Error fetching order:", err);
       setError("Failed to load order details");
